@@ -44,18 +44,19 @@ async function initLibraries() {
       try {
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-        // 🔥 Mobile fix: Phantom does NOT inject window.solana unless app is opened
+        // 🔥 Mobile fix — deep link into Phantom
         if (isMobile && (!window.solana || !window.solana.isPhantom)) {
           const deepLink = `https://phantom.app/ul/v1/connect?app_url=${encodeURIComponent(window.location.href)}`;
           window.location.href = deepLink;
           return;
         }
 
-        // 🔥 Desktop fallback
         if (!window.solana) throw new Error("Phantom wallet not found. Install Phantom.");
         if (!window.solana.isPhantom) throw new Error("Non-Phantom wallet detected.");
 
-        const resp = await window.solana.connect();
+        // IMPORTANT: required for mobile + desktop
+        const resp = await window.solana.connect({ onlyIfTrusted: false });
+
         publicKey = resp.publicKey;
         connection = new Connection(RPC_ENDPOINT, 'confirmed');
 
@@ -198,8 +199,24 @@ async function initLibraries() {
     run401Btn.addEventListener("click", run401);
     run402Btn.addEventListener("click", run402);
 
-    if (window.solana && window.solana.isConnected) {
-      await connectWallet().catch(() => {});
+    /* -------------------------------------------------------------
+       ✔ IMPORTANT FIX — Auto-complete Phantom mobile connection
+    ------------------------------------------------------------- */
+    if (window.solana) {
+      try {
+        // If Phantom is already connected (rare)
+        if (window.solana.isConnected) {
+          await connectWallet().catch(() => {});
+        } else {
+          // Try to finish the handshake automatically after deep link return
+          await window.solana.connect({ onlyIfTrusted: false }).catch(() => {});
+          if (window.solana.isConnected) {
+            await connectWallet().catch(() => {});
+          }
+        }
+      } catch (e) {
+        console.warn("Auto-connect failed:", e);
+      }
     }
 
   } catch (err) {
