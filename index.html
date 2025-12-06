@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zephyr</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/style.css" />
+
+  <!-- Ethers v5 (consistent with the JS below) -->
+</head>
+<body>
+  <div class="top-glow"></div>
+
+  <nav class="navbar container">
+    <div class="logo gradient-text">ZEPHYR</div>
+
+    <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#features">Core Features</a></li>
+      <li><a href="#roadmap">ZEPHYR Roadmap</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div id="network-badge" class="network-badge">No wallet</div>
+      <button id="connectBtn" class="btn-primary">Connect Wallet</button>
+    </div>
+  </nav>
+
+  <section id="hero" class="hero container">
+    <h1 class="hero-title gradient-text">✨ The Developer-First Web3 Toolkit</h1>
+    <p class="hero-subtitle">
+      Connect your wallet to access the dashboard. Access gated for early users
+      <!-- <strong>100,000 $VELOCITY</strong>. -->
+    </p>
+
+    <div class="hero-cta">
+      <button id="authBtn" class="btn-primary big-btn">Connect & Unlock x401</button>
+      <div id="authStatus" class="inline-status"></div>
+    </div>
+  </section>
+
+  <section id="features" class="features container">
+    <h2 class="section-title gradient-text">Core Features</h2>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="fc-icon">🔐</div>
+        <h3>x401 — Signature Login</h3>
+        <p>Secure, developer-first auth using off-chain signatures. Sign once, then use server-verified session tokens for dashboard access.</p>
+        <button class="btn-secondary small" id="run401Btn">Run x401 (Sign)</button>
+      </div>
+
+      <div class="feature-card">
+        <div class="fc-icon">⚡</div>
+        <h3>x402 — Token Powered Access</h3>
+        <p>Pay with SOL or USDC to unlock premium endpoints. The code verifies balance and decimals before sending transfers.</p>
+        <select id="paymentType" class="custom-select small">
+          <option value="sol">SOL</option>
+          <option value="usdc">USDC</option>
+        </select>
+        <button class="btn-secondary small" id="run402Btn">Run x402 (Pay)</button>
+        <div id="paymentStatus" class="inline-status small"></div>
+      </div>
+
+      <div class="feature-card">
+        <div class="fc-icon">🛒</div>
+        <h3>Marketplace Ready</h3>
+        <p>Auto-list registered endpoints and accept token payments from users and agents.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="fc-icon">🤖</div>
+        <h3>MCP Compatible</h3>
+        <p>Designed to interoperate with MCP agents and clients — agent-first primitives included.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="roadmap" class="roadmap-section">
+  <h2 class="section-title">Zephyr Roadmap</h2>
+  <div class="roadmap-grid">
+<div class="roadmap-card">
+  <h3>Phase 01 — Foundation</h3>
+  <ul>
+    <li>Project concept and architecture definition.</li>
+    <li>Core SDK and authentication (x401) implementation.</li>
+    <li>Initial API endpoint models and Web3 wallet connection.</li>
+  </ul>
+</div>
+
+<div class="roadmap-card">
+  <h3>Phase 02 — Ecosystem Launch</h3>
+  <ul>
+    <li>Release of Zephyr dashboard with secure gated features.</li>
+    <li>On-chain programmable payment integration (x402).</li>
+    <li>Token contract deployment and utility activation.</li>
+  </ul>
+</div>
+
+<div class="roadmap-card">
+  <h3>Phase 03 — Developer Expansion</h3>
+  <ul>
+    <li>Advanced SDK improvements.</li>
+    <li>API keyless access model refined.</li>
+    <li>Documentation expansion and tutorials.</li>
+  </ul>
+</div>
+
+<div class="roadmap-card">
+  <h3>Phase 04 — Global Adoption</h3>
+  <ul>
+    <li>Mass onboarding of developers and teams.</li>
+    <li>Cross-chain support and module expansion.</li>
+    <li>Marketplace ecosystem and partner integrations.</li>
+  </ul>
+
+</section>
+
+
+  <footer class="footer container">
+    © 2025 Zephyr • Built for Agents & Developers
+  </footer>
+
+  <!-- Script -->
+
+<script type="module" src="/script.js"></script>
+</body>
+</html>
