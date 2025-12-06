@@ -25,7 +25,15 @@ body {
 .nav-links a:hover { opacity: 1; transform: translateY(-2px); }
 
 /* network badge */
-.network-badge { background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 999px; font-size: 0.85rem; margin-right: 12px; display:inline-block; color:#cfefff; }
+.network-badge {
+  background: rgba(255,255,255,0.04);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  margin-right: 12px;
+  display:inline-block;
+  color:#cfefff;
+}
 
 /* Buttons */
 .btn-primary {
@@ -33,9 +41,13 @@ body {
   padding: 10px 20px; border-radius: 999px; font-weight: 700; cursor: pointer;
   box-shadow: 0 6px 30px rgba(255,215,0,0.12); transition: transform .18s;
 }
-.btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 45px rgba(255,215,0,0.14); }
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 45px rgba(255,215,0,0.14);
+}
 .btn-secondary {
-  border-radius: 999px; padding: 8px 16px; border: 2px solid #FFD700; background: transparent; color: #FFD700; cursor: pointer;
+  border-radius: 999px; padding: 8px 16px;
+  border: 2px solid #FFD700; background: transparent; color: #FFD700; cursor: pointer;
 }
 .big-btn { padding: 14px 32px; font-size: 1.05rem; }
 
@@ -47,41 +59,54 @@ body {
 .inline-status { margin-left: 12px; color: #bff3ff; font-size: 0.95rem; }
 
 /* Gradient text utility */
-.gradient-text { background: linear-gradient(90deg,#777777,#FFD700); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.gradient-text {
+  background: linear-gradient(90deg,#777777,#FFD700);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
 
 /* FEATURES */
 .features { padding: 100px 0; text-align: center; }
 .section-title { font-size: 2.1rem; margin-bottom: 46px; }
-.feature-grid { 
-  display: grid; 
-  grid-template-columns: repeat(2, 1fr); /* Changed to fixed 2 columns for 2x2 layout */
-  gap: 22px; 
-  align-items: stretch; 
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  align-items: stretch;
 }
+
 .feature-card {
-  background: rgba(255,255,255,0.04); padding: 26px; border-radius: 14px; backdrop-filter: blur(10px);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.45); transition: transform .25s, box-shadow .25s;
+  background: rgba(255,255,255,0.04);
+  padding: 26px;
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+  transition: transform .25s, box-shadow .25s;
 }
-.feature-card:hover { transform: translateY(-8px); box-shadow: 0 18px 60px rgba(255,215,0,0.06); }
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 60px rgba(255,215,0,0.06);
+}
 .fc-icon { font-size: 26px; margin-bottom: 8px; }
 
 /* Custom select dropdown for x402 */
 .custom-select {
-  background: #000000; /* Black background */
-  color: #FFD700; /* Gold text */
-  border: 2px solid #FFD700; /* Gold border */
-  border-radius: 8px; /* Rounded corners */
-  padding: 8px 12px; /* Padding for comfort */
-  font-size: 0.92rem; /* Matches small class */
+  background: #000000;
+  color: #FFD700;
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.92rem;
   cursor: pointer;
-  outline: none; /* Remove default outline */
-  box-shadow: 0 2px 8px rgba(255,215,0,0.1); /* Subtle gold shadow */
-  transition: all 0.2s ease; /* Smooth hover/focus */
+  outline: none;
+  box-shadow: 0 2px 8px rgba(255,215,0,0.1);
+  transition: all 0.2s ease;
 }
 .custom-select:hover, .custom-select:focus {
-  border-color: #FFD700; /* Keep gold on hover */
-  box-shadow: 0 4px 12px rgba(255,215,0,0.2); /* Slight glow */
-  background: #111111; /* Slightly lighter black on focus */
+  border-color: #FFD700;
+  box-shadow: 0 4px 12px rgba(255,215,0,0.2);
+  background: #111111;
 }
 
 /* Small button style used inside cards */
@@ -89,67 +114,101 @@ body {
 
 /* Roadmap Section */
 #roadmap {
-padding: 120px 0;
-background: #050511;
-position: relative;
+  padding: 120px 0;
+  background: #050511;
+  position: relative;
 }
-
 .roadmap-section {
-max-width: 1400px;
-margin: auto;
+  max-width: 1400px;
+  margin: auto;
 }
-
 .section-title {
-font-size: 3.5rem;
-font-weight: 800;
-text-align: center;
-margin-bottom: 60px;
-background: linear-gradient(to right, #777777, #FFD700);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
+  font-size: 3.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 60px;
+  background: linear-gradient(to right, #777777, #FFD700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .roadmap-grid {
-display: grid;
-grid-template-columns: repeat(2, 1fr); /* Changed to fixed 2 columns for 2x2 layout */
-gap: 40px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
 }
 
 .roadmap-card {
-background: rgba(255,255,255,0.04);
-padding: 40px 35px;
-border-radius: 18px;
-border: 1px solid rgba(74,20,140,0.2);
-box-shadow: 0 0 35px rgba(74,20,140,0.1);
-backdrop-filter: blur(10px);
-transition: 0.25s;
+  background: rgba(255,255,255,0.04);
+  padding: 40px 35px;
+  border-radius: 18px;
+  border: 1px solid rgba(74,20,140,0.2);
+  box-shadow: 0 0 35px rgba(74,20,140,0.1);
+  backdrop-filter: blur(10px);
+  transition: 0.25s;
 }
-
 .roadmap-card:hover {
-transform: translateY(-8px);
-box-shadow: 0 0 55px rgba(255,215,0,0.35);
+  transform: translateY(-8px);
+  box-shadow: 0 0 55px rgba(255,215,0,0.35);
 }
-
 .roadmap-card h3 {
-font-size: 1.9rem;
-margin-bottom: 20px;
-font-weight: 700;
-color: #c7baff;
+  font-size: 1.9rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: #c7baff;
 }
-
 .roadmap-card ul {
-line-height: 1.8;
-font-size: 1.15rem;
-color: #d1d1ff;
+  line-height: 1.8;
+  font-size: 1.15rem;
+  color: #d1d1ff;
 }
-
 
 /* FOOTER */
-.footer { padding: 40px 0; text-align: center; opacity: 0.7; font-size: 0.95rem; }
+.footer {
+  padding: 40px 0;
+  text-align: center;
+  opacity: 0.7;
+  font-size: 0.95rem;
+}
 
-/* Responsive tweaks */
+/* Legacy responsive tweaks */
 @media (max-width:720px) {
   .hero-title { font-size: 2.2rem; }
   .nav-links { display: none; }
   .network-badge { display:none; }
+}
+
+/* ---------------- MOBILE FIX (SAFE) ---------------- */
+@media (max-width: 768px) {
+  .container { padding: 0 16px; }
+
+  .hero { padding: 100px 0 60px; text-align: center; }
+  .hero-title { font-size: 2.4rem; line-height: 1.1; }
+  .hero-subtitle { font-size: 1rem; }
+
+  .nav-links { display: none !important; }
+  .network-badge { display: none !important; }
+
+  .feature-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px;
+  }
+
+  .roadmap-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px;
+  }
+
+  .roadmap-card { padding: 32px 24px; }
+
+  .section-title {
+    font-size: 2.4rem;
+    margin-bottom: 40px;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  .hero-title { font-size: 2rem; }
+  .section-title { font-size: 2.2rem; }
 }
