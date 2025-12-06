@@ -1,32 +1,22 @@
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
-
 /* ------------- CONFIG - Replace these with real values ------------- */
-/* For Solana/SPL tokens:
-   - VELOCITY_TOKEN_MINT must be a real SPL token mint address (e.g., USDC: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
-   - RECEIVER_PUBLIC_KEY is the Solana account that will receive tokens
-   - REQUIRED_HOLD is used for display only (100000 means 100000 tokens, adjust decimals below)
-   - RPC_ENDPOINT: Use mainnet-beta for production, devnet for testing
-*/
-const VELOCITY_TOKEN_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // Example: USDC mint (REPLACE)
-const RECEIVER_PUBLIC_KEY = "4GuJSQQxpAJkQ4sRbU3y9Q9xrsQXYCJFtRHUmqxErcb7"; // Example: REPLACE with real public key
-const REQUIRED_HOLD = "100000"; // used for display, not enforced client-side
+const VELOCITY_TOKEN_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+const RECEIVER_PUBLIC_KEY = "4GuJSQQxpAJkQ4sRbU3y9Q9xrsQXYCJFtRHUmqxErcb7";
+const REQUIRED_HOLD = "100000";
 const RPC_ENDPOINT = "https://api.devnet.solana.com";
 
-
 /* --------------------------------------------------------------------- */
-// Imports (replaces dynamic CDN loading)
 import { getAssociatedTokenAddress, createTransferInstruction, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Connection, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 
-// Initialize after libraries load (now instant with imports)
 async function initLibraries() {
   try {
     let connection = null;
     let publicKey = null;
 
-    /* UI elements */
+    /* UI */
     const connectBtn = document.getElementById("connectBtn");
     const authBtn = document.getElementById("authBtn");
     const run401Btn = document.getElementById("run401Btn");
@@ -35,7 +25,6 @@ async function initLibraries() {
     const paymentStatus = document.getElementById("paymentStatus");
     const networkBadge = document.getElementById("network-badge");
 
-    /* Helpers: show statuses */
     function showAuth(msg, isError = false) {
       authStatus.textContent = msg;
       authStatus.style.color = isError ? "#ffb3c6" : "#bff3ff";
@@ -48,9 +37,21 @@ async function initLibraries() {
       networkBadge.textContent = msg;
     }
 
-    /* Connect wallet & update UI */
+    /* -------------------------------------------------------------
+       ✔ FIXED: CONNECT WALLET (Mobile Phantom + Desktop Phantom)
+    ------------------------------------------------------------- */
     async function connectWallet() {
       try {
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        // 🔥 Mobile fix: Phantom does NOT inject window.solana unless app is opened
+        if (isMobile && (!window.solana || !window.solana.isPhantom)) {
+          const deepLink = `https://phantom.app/ul/v1/connect?app_url=${encodeURIComponent(window.location.href)}`;
+          window.location.href = deepLink;
+          return;
+        }
+
+        // 🔥 Desktop fallback
         if (!window.solana) throw new Error("Phantom wallet not found. Install Phantom.");
         if (!window.solana.isPhantom) throw new Error("Non-Phantom wallet detected.");
 
@@ -60,10 +61,13 @@ async function initLibraries() {
 
         showNetwork(`Network: Solana (${RPC_ENDPOINT.includes('devnet') ? 'Devnet' : 'Mainnet'})`);
 
-        connectBtn.textContent = publicKey.toString().slice(0,6) + "..." + publicKey.toString().slice(-4);
-        showAuth("Wallet connected: " + publicKey.toString().slice(0,8));
+        connectBtn.textContent =
+          publicKey.toString().slice(0, 6) +
+          "..." +
+          publicKey.toString().slice(-4);
 
-        // Try to fetch token balance if token mint is set
+        showAuth("Wallet connected: " + publicKey.toString().slice(0, 8));
+
         if (isTokenConfigured()) {
           await displayTokenBalance();
         } else {
@@ -75,19 +79,18 @@ async function initLibraries() {
       }
     }
 
-    /* x401: sign a message via a dummy transaction and verify */
+    /* x401 — sign message */
     async function run401() {
       try {
         if (!publicKey) return showAuth("Connect wallet first", true);
 
         const message = `Zephyr x401: Sign to link wallet — ${new Date().toISOString()}`;
-        // Encode message as Uint8Array (browser-compatible, no Buffer needed)
-        const messageBytes = new TextEncoder().encode(message); // Converts string to Uint8Array
+        const messageBytes = new TextEncoder().encode(message);
 
         const memoIx = new TransactionInstruction({
           keys: [],
-          programId: new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"), // Memo program
-          data: messageBytes, // Use Uint8Array directly
+          programId: new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"),
+          data: messageBytes,
         });
 
         const transaction = new Transaction().add(memoIx);
@@ -95,7 +98,7 @@ async function initLibraries() {
         transaction.feePayer = publicKey;
 
         const signedTx = await window.solana.signTransaction(transaction);
-        // Verify by checking if the signer matches (basic check; for full verification, send and confirm)
+
         if (signedTx.signatures.some(sig => sig.publicKey.equals(publicKey))) {
           showAuth("✅ x401 success. Wallet linked.");
         } else {
@@ -107,43 +110,38 @@ async function initLibraries() {
       }
     }
 
-    /* x402: check token balance then transfer SPL tokens */
+    /* x402 — SPL token transfer */
     async function run402() {
       try {
         if (!publicKey) return showPayment("Connect wallet first", true);
-        if (!isTokenConfigured()) return showPayment("Token mint or receiver not configured in script.js", true);
+        if (!isTokenConfigured()) return showPayment("Token mint or receiver not configured", true);
 
         showPayment("Preparing payment...");
 
-        // Get user's associated token account for the mint
         const userTokenAccount = await getAssociatedTokenAddress(
           new PublicKey(VELOCITY_TOKEN_MINT),
           publicKey
         );
 
-        // Fetch balance
         const accountInfo = await connection.getTokenAccountBalance(userTokenAccount);
         const decimals = accountInfo.value.decimals;
         const userBal = accountInfo.value.uiAmountString;
 
-        showPayment(`Your token balance: ${userBal} (decimals: ${decimals})`);
+        showPayment(`Your token balance: ${userBal}`);
 
-        // Amount to send: small demo (0.01 tokens)
         const amountToSendHuman = "0.01";
         const amountToSend = Math.floor(parseFloat(amountToSendHuman) * Math.pow(10, decimals));
 
         if (parseFloat(userBal) < parseFloat(amountToSendHuman)) {
-          showPayment(`Insufficient token balance. Need ${amountToSendHuman} tokens.`, true);
+          showPayment(`Insufficient balance. Need ${amountToSendHuman} tokens.`, true);
           return;
         }
 
-        // Get receiver's associated token account
         const receiverTokenAccount = await getAssociatedTokenAddress(
           new PublicKey(VELOCITY_TOKEN_MINT),
           new PublicKey(RECEIVER_PUBLIC_KEY)
         );
 
-        // Create transfer instruction (compatible with all versions)
         const transferIx = createTransferInstruction(
           userTokenAccount,
           receiverTokenAccount,
@@ -157,23 +155,22 @@ async function initLibraries() {
         transaction.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
         transaction.feePayer = publicKey;
 
-        showPayment(`Sending ${amountToSendHuman} tokens to receiver...`);
+        showPayment(`Sending ${amountToSendHuman} tokens...`);
 
         const signedTx = await window.solana.signTransaction(transaction);
         const txId = await connection.sendRawTransaction(signedTx.serialize());
-        showPayment(`Tx sent: ${txId} — waiting for confirmation...`);
+
+        showPayment(`Tx: ${txId} — pending confirmation...`);
 
         await connection.confirmTransaction(txId);
         showPayment(`✅ x402 Payment Confirmed — tx: ${txId}`);
       } catch (err) {
         console.error(err);
-        const msg = err && err.message ? err.message : String(err);
-        const hint = msg.includes("insufficient") ? " (Check you have SOL for fees)" : "";
-        showPayment("x402 failed: " + msg + hint, true);
+        showPayment("x402 failed: " + (err.message || err), true);
       }
     }
 
-    /* Utility: display balance */
+    /* Display balance */
     async function displayTokenBalance() {
       try {
         const userTokenAccount = await getAssociatedTokenAddress(
@@ -182,36 +179,32 @@ async function initLibraries() {
         );
         const accountInfo = await connection.getTokenAccountBalance(userTokenAccount);
         const bal = accountInfo.value.uiAmountString;
-        showPayment(`Token balance: ${bal} • Need ${REQUIRED_HOLD} to access dashboard (UI check only).`);
+
+        showPayment(`Token balance: ${bal}`);
       } catch (err) {
-        console.warn("balance display failed:", err);
-        showPayment("Could not read token balance — check token mint & network", true);
+        showPayment("Could not read token balance", true);
       }
     }
 
-    /* Utility: check config */
     function isTokenConfigured() {
-      const zero = "11111111111111111111111111111112"; // Solana zero pubkey
-      return VELOCITY_TOKEN_MINT && RECEIVER_PUBLIC_KEY && VELOCITY_TOKEN_MINT !== zero && RECEIVER_PUBLIC_KEY !== zero;
+      const zero = "11111111111111111111111111111112";
+      return VELOCITY_TOKEN_MINT && RECEIVER_PUBLIC_KEY &&
+             VELOCITY_TOKEN_MINT !== zero &&
+             RECEIVER_PUBLIC_KEY !== zero;
     }
 
-    /* Wire UI */
     connectBtn.addEventListener("click", connectWallet);
     authBtn.addEventListener("click", run401);
     run401Btn.addEventListener("click", run401);
     run402Btn.addEventListener("click", run402);
 
-    /* Auto-connect if already connected */
-    (async function tryAutoConnect() {
-      if (window.solana && window.solana.isConnected) {
-        await connectWallet().catch(() => {});
-      }
-    })();
-    
+    if (window.solana && window.solana.isConnected) {
+      await connectWallet().catch(() => {});
+    }
+
   } catch (err) {
     console.error("Library loading failed:", err);
   }
 }
 
-// Call initLibraries when the page loads
 initLibraries();
