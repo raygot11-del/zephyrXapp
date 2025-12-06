@@ -59,15 +59,23 @@ async function initLibraries() {
         }
       }
 
-      // Wait until Phantom is injected on mobile
+      // Wait until Phantom is injected on mobile (with timeout safeguard)
       if (isMobile) {
-        await new Promise(resolve => {
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error("Could not open Phantom wallet. Please try again."));
+          }, 8000); // 8 seconds timeout
+
           const check = setInterval(() => {
             if (window.solana && window.solana.isPhantom) {
               clearInterval(check);
+              clearTimeout(timeout);
               resolve();
             }
           }, 100);
+        }).catch(err => {
+          showAuth(err.message, true);
+          return;
         });
       }
 
@@ -87,7 +95,9 @@ async function initLibraries() {
 
     } catch (err) {
       console.error(err);
-      showAuth("Wallet connect failed: " + (err.message || err), true);
+      if (!authStatus.textContent.includes("Could not open Phantom")) {
+        showAuth("Wallet connect failed: " + (err.message || err), true);
+      }
     }
   }
 
@@ -218,18 +228,19 @@ async function initLibraries() {
     url.searchParams.delete("phantom_connected");
     window.history.replaceState({}, document.title, url);
 
-    // Wait for Phantom injection on mobile
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) {
-      const waitForSolana = setInterval(() => {
-        if (window.solana && window.solana.isPhantom) {
-          clearInterval(waitForSolana);
-          connectWallet();
-        }
-      }, 100);
-    } else {
-      connectWallet();
-    }
+    // Wait until Phantom is injected before calling connectWallet
+    const waitForSolana = setInterval(() => {
+      if (window.solana && window.solana.isPhantom) {
+        clearInterval(waitForSolana);
+        connectWallet();
+      }
+    }, 100);
+
+    // Timeout safeguard for auto-connect
+    setTimeout(() => {
+      clearInterval(waitForSolana);
+      showAuth("Could not open Phantom wallet. Please try again.", true);
+    }, 8000); // 8 seconds
   }
 }
 
