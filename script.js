@@ -24,6 +24,14 @@ async function initLibraries() {
   const paymentStatus = document.getElementById("paymentStatus");
   const networkBadge = document.getElementById("network-badge");
 
+  // ✅ NEW: Phantom deep-link button
+  let openPhantomBtn = document.createElement("button");
+  openPhantomBtn.id = "openPhantomBtn";
+  openPhantomBtn.className = "btn-primary big-btn";
+  openPhantomBtn.textContent = "Open Phantom Wallet";
+  // Insert it after Connect Wallet button
+  connectBtn.parentNode.insertBefore(openPhantomBtn, connectBtn.nextSibling);
+
   function showAuth(msg, isError = false) {
     authStatus.textContent = msg;
     authStatus.style.color = isError ? "#ffb3c6" : "#bff3ff";
@@ -43,46 +51,23 @@ async function initLibraries() {
            RECEIVER_PUBLIC_KEY !== zero;
   }
 
-  /* ----------------------------------
+  /* -----------------------------
      Mobile + Desktop wallet connect
-  ---------------------------------- */
+  ----------------------------- */
   async function connectWallet() {
-    try {
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-      // 🔥 Mobile deep-link for first-time connection
-      if (isMobile && (!window.solana || !window.solana.isPhantom)) {
-        if (!window.location.search.includes("phantom_connected=true")) {
-          const deepLink = `https://phantom.app/ul/v1/connect?app_url=${encodeURIComponent(window.location.href)}&redirect_link=${encodeURIComponent(window.location.href + "?phantom_connected=true")}`;
-          window.location.href = deepLink;
-          return;
-        }
-      }
-
-      // Wait until Phantom is injected on mobile (with timeout safeguard)
+    if (!window.solana || !window.solana.isPhantom) {
       if (isMobile) {
-        await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error("Could not open Phantom wallet. Please try again."));
-          }, 8000); // 8 seconds timeout
-
-          const check = setInterval(() => {
-            if (window.solana && window.solana.isPhantom) {
-              clearInterval(check);
-              clearTimeout(timeout);
-              resolve();
-            }
-          }, 100);
-        }).catch(err => {
-          showAuth(err.message, true);
-          return;
-        });
+        showAuth("Open Phantom app and press Connect", true);
+        return;
+      } else {
+        showAuth("Phantom wallet not found. Install Phantom.", true);
+        return;
       }
+    }
 
-      if (!window.solana) throw new Error("Phantom wallet not found. Install Phantom.");
-      if (!window.solana.isPhantom) throw new Error("Non-Phantom wallet detected.");
-
-      // Connect
+    try {
       const resp = await window.solana.connect({ onlyIfTrusted: false });
       publicKey = resp.publicKey;
       connection = new Connection(RPC_ENDPOINT, "confirmed");
@@ -92,12 +77,9 @@ async function initLibraries() {
       showAuth("Wallet connected: " + publicKey.toString().slice(0, 8));
 
       if (isTokenConfigured()) await displayTokenBalance();
-
     } catch (err) {
       console.error(err);
-      if (!authStatus.textContent.includes("Could not open Phantom")) {
-        showAuth("Wallet connect failed: " + (err.message || err), true);
-      }
+      showAuth("Wallet connect failed: " + (err.message || err), true);
     }
   }
 
@@ -105,23 +87,21 @@ async function initLibraries() {
      x401 — sign message
   ---------------------------------- */
   async function run401() {
+    if (!publicKey) return showAuth("Connect wallet first", true);
     try {
-      if (!publicKey) return showAuth("Connect wallet first", true);
-
       const message = `Zephyr x401: Sign to link wallet — ${new Date().toISOString()}`;
-      const messageBytes = new TextEncoder().encode(message);
-
       const memoIx = new TransactionInstruction({
         keys: [],
         programId: new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"),
-        data: messageBytes,
+        data: new TextEncoder().encode(message),
       });
 
-      const transaction = new Transaction().add(memoIx);
-      transaction.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-      transaction.feePayer = publicKey;
+      const tx = new Transaction().add(memoIx);
+      tx.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+      tx.feePayer = publicKey;
 
-      const signedTx = await window.solana.signTransaction(transaction);
+      const signedTx = await window.solana.signTransaction(tx);
+
       if (signedTx.signatures.some(sig => sig.publicKey.equals(publicKey))) {
         showAuth("✅ x401 success. Wallet linked.");
       } else {
@@ -137,12 +117,11 @@ async function initLibraries() {
      x402 — SPL token transfer
   ---------------------------------- */
   async function run402() {
+    if (!publicKey) return showPayment("Connect wallet first", true);
+    if (!isTokenConfigured()) return showPayment("Token mint or receiver not configured", true);
+
     try {
-      if (!publicKey) return showPayment("Connect wallet first", true);
-      if (!isTokenConfigured()) return showPayment("Token mint or receiver not configured", true);
-
       showPayment("Preparing payment...");
-
       const userTokenAccount = await getAssociatedTokenAddress(
         new PublicKey(VELOCITY_TOKEN_MINT),
         publicKey
@@ -183,8 +162,8 @@ async function initLibraries() {
       showPayment(`Sending ${amountToSendHuman} tokens...`);
       const signedTx = await window.solana.signTransaction(transaction);
       const txId = await connection.sendRawTransaction(signedTx.serialize());
-      showPayment(`Tx: ${txId} — pending confirmation...`);
 
+      showPayment(`Tx: ${txId} — pending confirmation...`);
       await connection.confirmTransaction(txId);
       showPayment(`✅ x402 Payment Confirmed — tx: ${txId}`);
     } catch (err) {
@@ -193,9 +172,9 @@ async function initLibraries() {
     }
   }
 
-  /* ----------------------------------
+  /* -----------------------------
      Display token balance
-  ---------------------------------- */
+  ----------------------------- */
   async function displayTokenBalance() {
     try {
       const userTokenAccount = await getAssociatedTokenAddress(
@@ -218,29 +197,21 @@ async function initLibraries() {
   run401Btn.addEventListener("click", run401);
   run402Btn.addEventListener("click", run402);
 
-  /* -------------------------------------------------------------
-     Auto-complete Phantom mobile connection after deep link
-  ------------------------------------------------------------- */
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get("phantom_connected") === "true") {
-    // Remove query parameter from URL
-    const url = new URL(window.location);
-    url.searchParams.delete("phantom_connected");
-    window.history.replaceState({}, document.title, url);
+  // ✅ NEW: Phantom deep-link button click
+  openPhantomBtn.addEventListener("click", () => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isMobile) {
+      alert("This button is only for mobile Phantom app.");
+      return;
+    }
+    window.location.href = "phantom://open";
+  });
 
-    // Wait until Phantom is injected before calling connectWallet
-    const waitForSolana = setInterval(() => {
-      if (window.solana && window.solana.isPhantom) {
-        clearInterval(waitForSolana);
-        connectWallet();
-      }
-    }, 100);
-
-    // Timeout safeguard for auto-connect
-    setTimeout(() => {
-      clearInterval(waitForSolana);
-      showAuth("Could not open Phantom wallet. Please try again.", true);
-    }, 8000); // 8 seconds
+  /* -----------------------------
+     Auto-connect desktop if Phantom already connected
+  ----------------------------- */
+  if (window.solana && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    if (window.solana.isConnected) connectWallet();
   }
 }
 
