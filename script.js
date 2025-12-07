@@ -1,13 +1,13 @@
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
-/* ------------- CONFIG - Replace these with real values ------------- */
+/* ------------- CONFIG ------------- */
 const VELOCITY_TOKEN_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const RECEIVER_PUBLIC_KEY = "4GuJSQQxpAJkQ4sRbU3y9Q9xrsQXYCJFtRHUmqxErcb7";
 const REQUIRED_HOLD = "100000";
 const RPC_ENDPOINT = "https://api.devnet.solana.com";
 
-/* --------------------------------------------------------------------- */
+/* --------------------------------- */
 import { getAssociatedTokenAddress, createTransferInstruction, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Connection, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 
@@ -23,14 +23,7 @@ async function initLibraries() {
   const authStatus = document.getElementById("authStatus");
   const paymentStatus = document.getElementById("paymentStatus");
   const networkBadge = document.getElementById("network-badge");
-
-  // ✅ NEW: Phantom deep-link button
-  let openPhantomBtn = document.createElement("button");
-  openPhantomBtn.id = "openPhantomBtn";
-  openPhantomBtn.className = "btn-primary big-btn";
-  openPhantomBtn.textContent = "Open Phantom Wallet";
-  // Insert it after Connect Wallet button
-  connectBtn.parentNode.insertBefore(openPhantomBtn, connectBtn.nextSibling);
+  const mobileWalletMessage = document.getElementById("mobileWalletMessage");
 
   function showAuth(msg, isError = false) {
     authStatus.textContent = msg;
@@ -57,14 +50,16 @@ async function initLibraries() {
   async function connectWallet() {
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+    if (isMobile && (!window.solana || !window.solana.isPhantom)) {
+      mobileWalletMessage.style.display = "block";
+      return;
+    } else {
+      mobileWalletMessage.style.display = "none";
+    }
+
     if (!window.solana || !window.solana.isPhantom) {
-      if (isMobile) {
-        showAuth("Open Phantom app and press Connect", true);
-        return;
-      } else {
-        showAuth("Phantom wallet not found. Install Phantom.", true);
-        return;
-      }
+      showAuth("Phantom wallet not found. Install Phantom.", true);
+      return;
     }
 
     try {
@@ -83,9 +78,7 @@ async function initLibraries() {
     }
   }
 
-  /* ----------------------------------
-     x401 — sign message
-  ---------------------------------- */
+  /* x401 — sign message */
   async function run401() {
     if (!publicKey) return showAuth("Connect wallet first", true);
     try {
@@ -113,9 +106,7 @@ async function initLibraries() {
     }
   }
 
-  /* ----------------------------------
-     x402 — SPL token transfer
-  ---------------------------------- */
+  /* x402 — SPL token transfer */
   async function run402() {
     if (!publicKey) return showPayment("Connect wallet first", true);
     if (!isTokenConfigured()) return showPayment("Token mint or receiver not configured", true);
@@ -172,9 +163,7 @@ async function initLibraries() {
     }
   }
 
-  /* -----------------------------
-     Display token balance
-  ----------------------------- */
+  /* Display token balance */
   async function displayTokenBalance() {
     try {
       const userTokenAccount = await getAssociatedTokenAddress(
@@ -189,27 +178,13 @@ async function initLibraries() {
     }
   }
 
-  /* ------------------
-     UI Event listeners
-  ------------------ */
+  /* UI Event listeners */
   connectBtn.addEventListener("click", connectWallet);
   authBtn.addEventListener("click", run401);
   run401Btn.addEventListener("click", run401);
   run402Btn.addEventListener("click", run402);
 
-  // ✅ NEW: Phantom deep-link button click
-  openPhantomBtn.addEventListener("click", () => {
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (!isMobile) {
-      alert("This button is only for mobile Phantom app.");
-      return;
-    }
-    window.location.href = "phantom://open";
-  });
-
-  /* -----------------------------
-     Auto-connect desktop if Phantom already connected
-  ----------------------------- */
+  /* Auto-connect desktop if Phantom already connected */
   if (window.solana && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
     if (window.solana.isConnected) connectWallet();
   }
