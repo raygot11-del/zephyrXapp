@@ -10,7 +10,7 @@ window.Buffer = Buffer;
    - RPC_ENDPOINT: Use mainnet-beta for production, devnet for testing
 */
 const VELOCITY_TOKEN_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // Example: USDC mint (REPLACE)
-const RECEIVER_PUBLIC_KEY = "4GuJSQQxpAJkQ4sRbU3y9Q9xrsQXYCJFtRHUmqxErcb7"; // Example: REPLACE with real public key
+const RECEIVER_PUBLIC_KEY = "6UsJoobvwZKPgKWxRgjNuMNLYrYNvJxhWjMUcT6WHYy7"; // Example: REPLACE with real public key
 const REQUIRED_HOLD = "100000"; // used for display, not enforced client-side
 const RPC_ENDPOINT = "https://api.devnet.solana.com";
 
@@ -215,3 +215,4 @@ async function initLibraries() {
 
 // Call initLibraries when the page loads
 initLibraries();
+
