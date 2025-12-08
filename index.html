@@ -13,20 +13,46 @@
 <body>
   <div class="top-glow"></div>
 
-  <nav class="navbar container">
-    <div class="logo gradient-text">ZEPHYR</div>
+ <nav class="navbar container">
+  <div class="logo gradient-text">ZEPHYR</div>
 
+  <!-- Hamburger for Mobile -->
+  <div class="hamburger" id="hamburger">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="nav-items" id="nav-items">
     <ul class="nav-links">
       <li><a href="#hero">Home</a></li>
       <li><a href="#features">Core Features</a></li>
-      <li><a href="#roadmap">ZEPHYR Roadmap</a></li>
+      <li><a href="#roadmap">Zephyr Roadmap</a></li>
     </ul>
 
     <div class="nav-actions">
       <div id="network-badge" class="network-badge">No wallet</div>
       <button id="connectBtn" class="btn-primary">Connect Wallet</button>
+
+      <div class="social-buttons">
+        <!-- X / Twitter -->
+        <a href="https://x.com/zephyrxsol?s=11&t=D9y-vtz0W511ude9SZYEQg" target="_blank" class="btn-social" aria-label="X">
+          <!-- svg here -->
+        </a>
+        <!-- GitHub -->
+        <a href="https://github.com/raygot11-del/zephyrXapp" target="_blank" class="btn-social" aria-label="GitHub">
+          <!-- svg here -->
+        </a>
+        <!-- DexScreener -->
+        <a href="#" id="dexBtn" class="btn-social" aria-label="DexScreener">
+          <!-- svg here -->
+        </a>
+      </div>
     </div>
-  </nav>
+  </div>
+</nav>
+
+
 
   <section id="hero" class="hero container">
     <h1 class="hero-title gradient-text">✨ The Developer-First Web3 Toolkit</h1>
