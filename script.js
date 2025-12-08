@@ -143,3 +143,18 @@ run402Btn?.addEventListener("click", run402);
 
 // Auto-connect
 if (window.solana?.isConnected) connectWallet();
+// Hamburger menu toggle (mobile)
+const hamburger = document.querySelector('.hamburger');
+const navLinks = document.querySelector('.nav-links');
+
+hamburger?.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks?.classList.toggle('active');
+});
+// Close hamburger menu when a nav link is clicked (mobile)
+navLinks?.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger?.classList.remove('active');
+    navLinks?.classList.remove('active');
+  });
+});
