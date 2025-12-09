@@ -38,9 +38,11 @@ body {
 
 .logo {
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   letter-spacing: 0.6px;
+  color: #FFD700; /* GOLD */
 }
+
 
 /* LINKS */
 .nav-links {
@@ -308,6 +310,36 @@ body {
   .feature-grid { grid-template-columns: 1fr; }
   .roadmap-grid { grid-template-columns: 1fr; }
 
+  /* Mobile dropdown specific */
+.nav-links li.mobile-actions,
+.nav-links li.mobile-socials {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Make mobile action buttons full width for better touch targets */
+.nav-links li.mobile-actions .btn-primary,
+.nav-links li.mobile-actions .btn-secondary {
+  width: 80%;
+}
+
+/* Center social buttons */
+.nav-links li.mobile-socials .social-buttons {
+  justify-content: center;
+}
+.desktop-socials {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 20px; /* spacing from links */
+}
+
+
+
   /* -------------------- HAMBURGER MENU -------------------- */
   .hamburger { 
     display: flex;
@@ -371,3 +403,4 @@ body {
 
   .btn-social { width: 28px; height: 28px; }
 }
+
