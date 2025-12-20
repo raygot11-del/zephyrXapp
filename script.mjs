@@ -92,7 +92,7 @@ async function run402() {
 
     showPayment(`Preparing ${amountHuman} ${paymentType.toUpperCase()}...`);
 
-    // Validate balance before sending (with retry for rate limits)
+       // Validate balance before sending (with retry for rate limits)
     let balance;
     try {
       balance = await connection.getBalance(publicKey);
@@ -107,23 +107,25 @@ async function run402() {
     }
 
     if (paymentType === "sol") {
-      const lamports = Math.floor(parseFloat(amountHuman) * 1_000_000_000);
-      if (balance < lamports) {
-        throw new Error("Insufficient SOL balance");
+      // Fixed: no underscores to prevent Rollup parse error on Vercel
+      const lamports = Math.floor(parseFloat(amountHuman) * 1000000000);
+      if (balance < lamports + 5000) { // Add a tiny buffer for fees
+        throw new Error("Insufficient SOL balance (need some for fees too)");
       }
     } else {
-      // USDC: Removed early ATA check — let the transaction create it if needed
+      // USDC balance check — fixed to treat missing ATA as 0 balance
       const mintPk = new PublicKey(USDC_MINT_MAINNET);
       const source = await getAssociatedTokenAddress(mintPk, publicKey);
       const tokenAcc = await connection.getParsedAccountInfo(source);
-      if (tokenAcc.value) {
-        // Only check balance if ATA exists
-        const uiAmount = tokenAcc.value.data.parsed.info.tokenAmount.uiAmount;
-        if (uiAmount < parseFloat(amountHuman)) {
-          throw new Error("Insufficient USDC balance");
-        }
+
+      let uiAmount = 0;
+      if (tokenAcc.value && tokenAcc.value.data.parsed?.info?.tokenAmount?.uiAmount !== null) {
+        uiAmount = tokenAcc.value.data.parsed.info.tokenAmount.uiAmount;
       }
-      // If ATA doesn't exist, proceed — the create instruction will handle it
+
+      if (uiAmount < parseFloat(amountHuman)) {
+        throw new Error("Insufficient USDC balance");
+      }
     }
 
     const tx = new Transaction();
@@ -137,7 +139,7 @@ async function run402() {
         fromPubkey: publicKey,
         toPubkey: new PublicKey(RECEIVER_PUBLIC_KEY),
         lamports
-      ));
+    }));
     } else {
       // USDC
       const mintPk = new PublicKey(USDC_MINT_MAINNET);
