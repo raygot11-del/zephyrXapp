@@ -43,7 +43,6 @@ body {
   color: #FFD700; /* GOLD */
 }
 
-
 /* LINKS */
 .nav-links {
   display: flex;
@@ -133,6 +132,17 @@ body {
 }
 
 .big-btn { padding: 14px 32px; font-size: 1.05rem; }
+
+/* -------------------------------- STATUS DIVS FIX -------------------------------- */
+#paymentStatus, #authStatus {
+  word-wrap: break-word; /* Breaks long words like URLs */
+  overflow-wrap: break-word;
+  max-width: 100%; /* Prevents horizontal expansion */
+  white-space: normal; /* Allows text to wrap */
+  height: auto; /* Allows height to adjust but not exceed */
+  max-height: 100px; /* Optional: Limit height to prevent excessive growth */
+  overflow-y: auto; /* Adds scroll if needed */
+}
 
 /* -------------------------------- HERO -------------------------------- */
 .hero {
@@ -338,8 +348,6 @@ body {
   margin-left: 20px; /* spacing from links */
 }
 
-
-
   /* -------------------- HAMBURGER MENU -------------------- */
   .hamburger { 
     display: flex;
@@ -403,4 +411,3 @@ body {
 
   .btn-social { width: 28px; height: 28px; }
 }
-
