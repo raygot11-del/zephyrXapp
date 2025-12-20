@@ -3,7 +3,7 @@ window.Buffer = Buffer;
 
 /* ------------- CONFIG ------------- */
 const RECEIVER_PUBLIC_KEY = "2dksmJMPCi75kdhpwqAnTiczsT9BXrG4k3VoQ26j9u3a";  // Receiver address
-const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"; // Changed to mainnet-beta
+const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"; // Mainnet RPC
 
 // Mainnet USDC mint
 const USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -54,7 +54,7 @@ async function connectWallet() {
     publicKey = resp.publicKey;
     connection = new Connection(RPC_ENDPOINT, "confirmed");
 
-    const networkName = RPC_ENDPOINT.includes('mainnet') ? 'Mainnet' : 'Devnet';  // Updated to detect mainnet
+    const networkName = RPC_ENDPOINT.includes('mainnet') ? 'Mainnet' : 'Devnet';
     showNetwork(`Network: Solana (${networkName})`);
 
     connectBtn.textContent = publicKey.toString().slice(0,6) + "..." + publicKey.toString().slice(-4);
@@ -88,19 +88,31 @@ async function run402() {
   try {
     const paymentType = paymentTypeSelect?.value || "sol";
     const amountInput = document.getElementById("amountInput");
-    const amountHuman = amountInput ? amountInput.value : "0.01"; // Fallback to "0.08" for 0.08 SOL/USDC
+    const amountHuman = amountInput ? amountInput.value : "0.08"; // Fallback to "0.08" for 0.08 SOL/USDC
 
     showPayment(`Preparing ${amountHuman} ${paymentType.toUpperCase()}...`);
 
-    // Validate balance before sending
+    // Validate balance before sending (with retry for rate limits)
+    let balance;
+    try {
+      balance = await connection.getBalance(publicKey);
+    } catch (e) {
+      if (e.message.includes('403') || e.message.includes('Access forbidden')) {
+        showPayment("Rate limited—retrying in 5 seconds...");
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+        balance = await connection.getBalance(publicKey); // Retry
+      } else {
+        throw e;
+      }
+    }
+
     if (paymentType === "sol") {
-      const balance = await connection.getBalance(publicKey);
       const lamports = Math.floor(parseFloat(amountHuman) * 1_000_000_000);
       if (balance < lamports) {
         throw new Error("Insufficient SOL balance");
       }
     } else {
-      const mintPk = new PublicKey(USDC_MINT_MAINNET);  // Updated to mainnet USDC
+      const mintPk = new PublicKey(USDC_MINT_MAINNET);
       const source = await getAssociatedTokenAddress(mintPk, publicKey);
       const tokenAcc = await connection.getParsedAccountInfo(source);
       if (tokenAcc.value) {
@@ -127,7 +139,7 @@ async function run402() {
       }));
     } else {
       // USDC
-      const mintPk = new PublicKey(USDC_MINT_MAINNET);  // Updated to mainnet USDC
+      const mintPk = new PublicKey(USDC_MINT_MAINNET);
       const source = await getAssociatedTokenAddress(mintPk, publicKey);
       const dest = await getAssociatedTokenAddress(mintPk, new PublicKey(RECEIVER_PUBLIC_KEY));
 
@@ -160,7 +172,7 @@ async function run402() {
     const signed = await window.solana.signTransaction(tx);
     const txId = await connection.sendRawTransaction(signed.serialize());
     await connection.confirmTransaction(txId);
-    showPayment(`Success! Sent ${amountHuman} ${paymentType.toUpperCase()} — <a href="https://explorer.solana.com/tx/${txId}?cluster=mainnet-beta" target="_blank" style="color: #FFD700;">View tx</a>`);  // Updated to mainnet explorer
+    showPayment(`Success! Sent ${amountHuman} ${paymentType.toUpperCase()} — <a href="https://explorer.solana.com/tx/${txId}?cluster=mainnet-beta" target="_blank" style="color: #FFD700;">View tx</a>`);
   } catch (e) {
     showPayment("x402 failed: " + e.message, true);
   }
@@ -202,4 +214,3 @@ navLinks?.querySelectorAll('a').forEach(link => {
     navLinks?.classList.remove('active');
   });
 });
-
