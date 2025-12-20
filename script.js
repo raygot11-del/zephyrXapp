@@ -88,7 +88,7 @@ async function run402() {
   try {
     const paymentType = paymentTypeSelect?.value || "sol";
     const amountInput = document.getElementById("amountInput");
-    const amountHuman = amountInput ? amountInput.value : "0.08"; // Fallback to "0.08" for 0.08 SOL/USDC
+    const amountHuman = amountInput ? amountInput.value : "0.01"; // Fallback to "0.08" for 0.08 SOL/USDC
 
     showPayment(`Preparing ${amountHuman} ${paymentType.toUpperCase()}...`);
 
@@ -202,3 +202,4 @@ navLinks?.querySelectorAll('a').forEach(link => {
     navLinks?.classList.remove('active');
   });
 });
+
