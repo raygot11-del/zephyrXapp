@@ -3,7 +3,7 @@ window.Buffer = Buffer;
 
 /* ------------- CONFIG ------------- */
 const RECEIVER_PUBLIC_KEY = "2dksmJMPCi75kdhpwqAnTiczsT9BXrG4k3VoQ26j9u3a";  // Receiver address
-const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"; // Mainnet RPC
+const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=c412f156-8868-4dd7-9587-80057b17040e"; // Helius RPC with your key
 
 // Mainnet USDC mint
 const USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -88,7 +88,7 @@ async function run402() {
   try {
     const paymentType = paymentTypeSelect?.value || "sol";
     const amountInput = document.getElementById("amountInput");
-    const amountHuman = amountInput ? amountInput.value : "0.01"; // Fallback to "0.08" for 0.08 SOL/USDC
+    const amountHuman = amountInput ? amountInput.value : "0.01"; // Fallback to "0.01" for 0.01 SOL/USDC
 
     showPayment(`Preparing ${amountHuman} ${paymentType.toUpperCase()}...`);
 
@@ -112,17 +112,18 @@ async function run402() {
         throw new Error("Insufficient SOL balance");
       }
     } else {
+      // USDC: Removed early ATA check — let the transaction create it if needed
       const mintPk = new PublicKey(USDC_MINT_MAINNET);
       const source = await getAssociatedTokenAddress(mintPk, publicKey);
       const tokenAcc = await connection.getParsedAccountInfo(source);
       if (tokenAcc.value) {
+        // Only check balance if ATA exists
         const uiAmount = tokenAcc.value.data.parsed.info.tokenAmount.uiAmount;
         if (uiAmount < parseFloat(amountHuman)) {
           throw new Error("Insufficient USDC balance");
         }
-      } else {
-        throw new Error("USDC account not found");
       }
+      // If ATA doesn't exist, proceed — the create instruction will handle it
     }
 
     const tx = new Transaction();
@@ -136,7 +137,7 @@ async function run402() {
         fromPubkey: publicKey,
         toPubkey: new PublicKey(RECEIVER_PUBLIC_KEY),
         lamports
-      }));
+      ));
     } else {
       // USDC
       const mintPk = new PublicKey(USDC_MINT_MAINNET);
@@ -214,4 +215,3 @@ navLinks?.querySelectorAll('a').forEach(link => {
     navLinks?.classList.remove('active');
   });
 });
-
