@@ -13,4 +13,14 @@ export default defineConfig({
   define: {
     global: 'globalThis',
   },
+  esbuild: {
+    loader: 'js',
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+      },
+    },
+  },
 });
