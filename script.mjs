@@ -210,6 +210,19 @@ hamburger?.addEventListener('click', () => {
   navLinks?.classList.toggle('active');
 });
 
+// Copy Contract Address Button
+const copyAddressBtn = document.getElementById("copyAddressBtn");
+const contractAddress = USDC_MINT_MAINNET.trim();
+
+copyAddressBtn?.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(contractAddress);
+    showAuth("Address copied!");
+  } catch (e) {
+    showAuth("Copy failed: " + e.message, true);
+  }
+});
+
 // Close hamburger menu when a nav link is clicked (mobile)
 navLinks?.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
@@ -217,4 +230,5 @@ navLinks?.querySelectorAll('a').forEach(link => {
     navLinks?.classList.remove('active');
   });
 });
+
 
