@@ -411,3 +411,30 @@ body {
 
   .btn-social { width: 28px; height: 28px; }
 }
+/* -------------------------------- CONTRACT SECTION -------------------------------- */
+.contract-section {
+  margin-top: 40px;
+  text-align: center;
+  padding: 20px;
+  background: rgba(5, 4, 4, 0.04);
+  border-radius: 14px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
+}
+
+.contract-title {
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+}
+
+.contract-address {
+  font-family: monospace;
+  color: #FFD700;
+  font-size: 1.1rem;
+  word-break: break-all;
+  margin-bottom: 16px;
+}
+
+.contract-address button {
+  margin-left: 12px;
+}
+
