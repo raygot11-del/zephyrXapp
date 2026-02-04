@@ -6,7 +6,7 @@ const RECEIVER_PUBLIC_KEY = "2dksmJMPCi75kdhpwqAnTiczsT9BXrG4k3VoQ26j9u3a";  // 
 const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=c412f156-8868-4dd7-9587-80057b17040e"; // Helius RPC with your key
 
 // Mainnet USDC mint
-const USDC_MINT_MAINNET = " 2TEAb8uE4CxyvhmrR9obiuMtGhLTBxGTv46QiM3opump";
+const USDC_MINT_MAINNET = " COMING SOON ";
 
 /* --------------------------------- */
 import { 
@@ -230,5 +230,6 @@ navLinks?.querySelectorAll('a').forEach(link => {
     navLinks?.classList.remove('active');
   });
 });
+
 
 
